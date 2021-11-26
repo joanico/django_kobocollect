@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+<div class="row">
+    <div class="col align-self-center">
+        <h1 class="kobo-title" style="margin: 20px; font-size: xx-large;">List Data from Kobo</h1>
+    </div>
+</div>
+<table class="table is-fullwidth is-striped is-bordered">
+    <thead>
+    <tr>
+        <th scope="col">Data</th>
+        <th scope="col">Naran</th>
+        <th scope="col">Municipiu</th>
+        <th scope="col">Postu</th>
+        <th scope="col">Suco</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for kobo in koboapi %}
+    <tr>
+        <th scope="row">{{kobo.Data}}</th>
+        <td>{{ kobo.Naran }}</td>
+        <td>{{ kobo.Municipiu }}</td>
+        <td>{{ kobo.Postu }}</td>
+        <td>{{ kobo.Suco }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+    {% for municipality in municipalities %}
+        <h2>{{ municipality.name }}</h2>
+    {% endfor %}
+{% endblock %}

@@ -1,19 +1,26 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.views.generic import TemplateView
-from .services import get_koboapi
 from ast import literal_eval
-from .models import Beneficiary, Municipality, PostAdmin, Suco
+from .models import Beneficiary
+from .services import get_apis, store_api
+from django.conf import settings
 import requests
+import coreapi
+import io
 
-def api(request):
-    response=requests.get('https://localcoviddata.com/covid19/v1/cases/jhu?state=CA&daysInPast=7').json()
-    return render(request, 'api/api_endpoint.html',{'response':response})
+class ApiView(TemplateView):
+    template_name =  'api/api_endpoint.html'
+    def get_context_data(self, *args, **kwargs):
+        context = super(ApiView, self).get_context_data(*args, **kwargs)
+        context['all_beneficiary'] = Beneficiary.objects.all().order_by('-id')
+        return context
 
 class GetKoboApi(TemplateView):
     template_name = 'api/kobo_list.html'
     def get_context_data(self, *args, **kwargs):
         context = {
-            'koboapi' : get_koboapi(),
+            'koboapi' : get_apis(),
         }
-        context['municipalities'] = Municipality.objects.all()
         return context
+

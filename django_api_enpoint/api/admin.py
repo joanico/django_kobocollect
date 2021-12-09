@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Beneficiary, Municipality, PostAdmin, Suco
+from .models import Beneficiary
 
-admin.site.register(Beneficiary)
-admin.site.register(Municipality)
-admin.site.register(PostAdmin)
-admin.site.register(Suco)
+@admin.register(Beneficiary)
+class BeneficiaryAdmin(admin.ModelAdmin):
+    list_display = ['date', 'name', 'municipality', 'postadmin', 'suco']
+    list_filter = ['name']

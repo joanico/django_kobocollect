@@ -4,17 +4,15 @@ from .models import Beneficiary
 from django.conf import settings
 
 def get_apis():
+    # get kobo api
     url = 'https://kobo.humanitarianresponse.info/api/v2/assets/aWN5dGyNjJSL8nZwxqh4E8/data/?format=json'
-    r = requests.get(url, headers={'Authorization': settings.ACCESS_TOKEN})
-    koboapi_json = r.json()
-    koboapi_list = []
-    for i in range(len(koboapi_json['results'])):
-        koboapi_list.append(koboapi_json['results'][i])
-    return koboapi_list
+    r = requests.get(url, headers={'Authorization': settings.ACCESS_TOKEN}) # kobo access token allow to access kobo data
+    koboapi_json = r.json() # return to json format
+    return koboapi_json
 
 def store_api():
-    results = get_apis()
-    for i in results:
+    koboapi_json = get_apis()
+    for i in koboapi_json['results']:
         beneficiary_data = Beneficiary(
             name = i['Naran'],
             date = i['Data'],
@@ -23,5 +21,5 @@ def store_api():
             suco = i['Suco'],
         )
         beneficiary_data.save()
-    return beneficiary_data
+    return i
     

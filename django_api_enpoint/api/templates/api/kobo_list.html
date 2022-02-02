@@ -19,15 +19,17 @@
     </tr>
     </thead>
     <tbody>
-    {% for kobo in koboapi %}
-    <tr>
-        <th scope="row">{{kobo.Data}}</th>
-        <td>{{ kobo.Naran }}</td>
-        <td>{{ kobo.Municipiu }}</td>
-        <td>{{ kobo.Postu }}</td>
-        <td>{{ kobo.Suco }}</td>
-    </tr>
-    {% endfor %}
+    {% if aplikante %}
+        {% for aplika in aplikante %}
+        <tr>
+            <th scope="row">{{aplika.date|date:'d-m-Y' }}</th>
+            <td>{{ aplika.name }}</td>
+            <td>{{ aplika.municipality }}</td>
+            <td>{{ aplika.postadmin }}</td>
+            <td>{{ aplika.suco }}</td>
+        </tr>
+        {% endfor %}
+    {% endif %}
     </tbody>
 </table>
 {% endblock %}

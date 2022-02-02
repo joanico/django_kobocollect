@@ -16,6 +16,3 @@ class Command(BaseCommand):
             print("Loading childrens data")
         else:
             return store_api()
-
-
-

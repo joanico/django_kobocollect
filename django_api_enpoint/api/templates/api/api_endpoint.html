@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+    {% if beneficiaries %}
+        {% for kobo in beneficiaries %}
+            {{kobo.Data}}
+            {{ kobo.Naran }}
+            {{ kobo.Municipiu }}
+            {{ kobo.Postu }}
+            {{ kobo.Suco }}
+        {% endfor %}
+    {% else %}
+        <div>
+          <p>No items Available</p>
+        </div>
+    {% endif %}
+{% endblock %}

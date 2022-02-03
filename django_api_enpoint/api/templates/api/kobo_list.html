@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% load static i18n %}
+
+{% block content %}
+<div class="row">
+    <div class="col align-self-center">
+        <h1 class="kobo-title" style="margin: 20px; font-size: xx-large;">List Data from Kobo</h1>
+    </div>
+</div>
+<table class="table is-fullwidth is-striped is-bordered">
+    <thead>
+    <tr>
+        <th scope="col">Data</th>
+        <th scope="col">Naran</th>
+        <th scope="col">Municipiu</th>
+        <th scope="col">Postu</th>
+        <th scope="col">Suco</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if aplikante %}
+        {% for aplika in aplikante %}
+        <tr>
+            <th scope="row">{{aplika.date|date:'d-m-Y' }}</th>
+            <td>{{ aplika.name }}</td>
+            <td>{{ aplika.municipality }}</td>
+            <td>{{ aplika.postadmin }}</td>
+            <td>{{ aplika.suco }}</td>
+        </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+{% endblock %}

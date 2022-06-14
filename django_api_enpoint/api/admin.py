@@ -3,7 +3,7 @@ from .models import Beneficiary, Municipality, PostAdmin, Suco
 
 @admin.register(Beneficiary)
 class BeneficiaryAdmin(admin.ModelAdmin):
-    list_display = ['date', 'name', 'municipality', 'postadmin', 'suco']
+    list_display = ['bene_id', 'date', 'name', 'municipality', 'postadmin', 'suco']
     list_filter = ['name']
 
 @admin.register(Municipality)

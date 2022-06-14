@@ -7,12 +7,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
 
-        # Show this if the data already exist in the database
-        if Beneficiary.objects.exists():
-            print('Beneficiary data already loaded...exiting.')
-            return
+        e = store_api()
 
-            # Show this before loading the data into the database
-            print("Loading childrens data")
+        # Show this if the data already exist in the database
+        if not Beneficiary.objects.filter(pk=e['_id']).exists():
+            return e
+            print('Succeful')
         else:
-            return store_api()
+            print('Beneficiary data already loaded...exiting.')

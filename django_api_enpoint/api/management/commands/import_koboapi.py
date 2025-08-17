@@ -1,3 +1,5 @@
+from ast import Delete
+from unicodedata import name
 from django.core.management.base import BaseCommand, CommandError
 from api.services import get_apis, store_api
 from api.models import Beneficiary
@@ -8,7 +10,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         # Show this if the data already exist in the database
-        if Beneficiary.objects.exists():
+        if Beneficiary.objects.values_list('name', 'suco').distinct():
             print('Beneficiary data already loaded...exiting.')
             return
 

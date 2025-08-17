@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-x%qfrrl@p5^nu33kq+qb@_6n9qki+#43j4rjqg&5l7kjm1^aie
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'django_extensions',
 ]
 
@@ -80,6 +79,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'kobo_db',
+        'HOST': '127.0.0.1',
+        'PORT': 5432,
     }
 }
 

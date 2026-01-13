@@ -1,6 +1,7 @@
 from django.db import models
 
 class Beneficiary(models.Model):
+    bene_id = models.IntegerField(blank = True, null = True)
     name = models.CharField(max_length=100, blank = True, null = True)
     date = models.DateTimeField(blank = True, null = True)
     municipality = models.CharField(max_length=100, blank = True, null = True)

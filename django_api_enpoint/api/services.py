@@ -13,13 +13,14 @@ def get_apis():
 def store_api():
     koboapi_json = get_apis()
     for i in koboapi_json['results']:
-        beneficiary_data = Beneficiary(
-            name = i['Naran'],
-            date = i['Data'],
-            municipality = i['Municipiu'],
-            postadmin = i['Postu'],
-            suco = i['Suco'],
-        )
-        beneficiary_data.save()
+        if i not in Beneficiary.objects.all():
+            beneficiary_data = Beneficiary(
+                bene_id = i['_id'],
+                name = i['Naran'],
+                date = i['Data'],
+                municipality = i['Municipiu'],
+                postadmin = i['Postu'],
+                suco = i['Suco'],
+            )
+            beneficiary_data.save()
     return i
-    

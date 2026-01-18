@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% load static %}
+{% load api_extras %}
+
+{% block title %}Forms - Fill and Edit{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <!-- Header Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="mb-2"><i class="fas fa-clipboard-list"></i> Forms</h1>
+          <p class="lead text-muted mb-0">Select a form to view details, fill out a new entry, or edit existing submissions.</p>
+          <div class="alert alert-info mt-3 mb-0" style="font-size: 0.9rem;">
+            <strong><i class="fas fa-info-circle"></i> About Kobo & Enketo:</strong>
+            <strong>Kobo</strong> stores your forms and data (backend). <strong>Enketo</strong> is the interface for filling out forms (frontend).
+            <strong>Use Enketo to fill out forms</strong> - click "Fill Form" to start!
+          </div>
+        </div>
+        <div>
+          <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-cog"></i> Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enketo Status Alert -->
+  {% if not enketo_available and enketo_status_message %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Enketo Not Available</h5>
+      <p class="mb-2">{{ enketo_status_message }}</p>
+      <hr>
+      <p class="mb-0">
+        <strong>Quick Fix:</strong> 
+        <a href="{% url 'admin:index' %}" class="alert-link">Use Django Admin</a> to create submissions, 
+        or see <code>RUN_ENKETO_LOCALLY.md</code> to start Enketo Express.
+      </p>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endif %}
+
+  <!-- Forms Grid -->
+  {% if forms %}
+    <div class="row">
+      {% for form in forms %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 shadow-sm form-card" style="cursor: pointer;" onclick="window.location='{% url 'form-detail' form_id=form.id %}'">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title mb-0">
+                  <i class="fas fa-file-alt text-primary"></i> {{ form.name }}
+                </h5>
+                <span class="badge badge-secondary">{{ form.version }}</span>
+              </div>
+              
+              <div class="mb-3">
+                <small class="text-muted d-block">
+                  <i class="fas fa-calendar"></i> Created: {{ form.created_at|date:"M d, Y" }}
+                </small>
+                <small class="text-muted d-block mt-1">
+                  <i class="fas fa-tag"></i> ID: <code>{{ form.kobo_id|truncatechars:15 }}</code>
+                </small>
+              </div>
+              
+              <div class="mb-3">
+                {% if form.id in form_submissions %}
+                  <span class="badge badge-info badge-pill">
+                    <i class="fas fa-check-circle"></i> {{ form_submissions|get_item:form.id|length }} submission(s)
+                  </span>
+                {% else %}
+                  <span class="badge badge-secondary badge-pill">
+                    <i class="fas fa-circle"></i> No submissions yet
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="card-footer bg-white border-top">
+              <div class="btn-group w-100" role="group">
+                <a href="{% url 'form-detail' form_id=form.id %}" class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation();">
+                  <i class="fas fa-info-circle"></i> View Details
+                </a>
+                {% if enketo_available %}
+                  <a href="{% url 'fill-form' form_id=form.id %}" class="btn btn-primary btn-sm" onclick="event.stopPropagation();">
+                    <i class="fas fa-plus-circle"></i> Fill Form
+                  </a>
+                {% else %}
+                  <button type="button" class="btn btn-primary btn-sm" disabled title="Enketo is not available" onclick="event.stopPropagation();">
+                    <i class="fas fa-plus-circle"></i> Fill Form
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      <h4><i class="fas fa-info-circle"></i> No Forms Available</h4>
+      <p>There are no forms available at the moment. Please contact an administrator to add forms.</p>
+      <a href="{% url 'admin:index' %}" class="btn btn-primary">
+        <i class="fas fa-cog"></i> Go to Admin
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .form-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+  }
+  .form-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+    border-color: #007bff;
+  }
+  .card-title {
+    color: #333;
+    font-weight: 600;
+  }
+  .card-footer {
+    border-radius: 0 0 10px 10px;
+  }
+  .badge-pill {
+    padding: 0.5em 0.75em;
+  }
+  .btn-group .btn {
+    flex: 1;
+  }
+  .lead {
+    font-size: 1.1rem;
+  }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}
+

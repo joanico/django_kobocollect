@@ -1,0 +1,156 @@
+{% extends "rest_framework/base.html" %}
+
+{% block title %}API Root - Kobo Django API{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>API Documentation</h1>
+  <p>Welcome to the API documentation. Use the endpoints below to interact with the API.</p>
+  
+  <div class="alert alert-info">
+    <strong>Note:</strong> Click on any link below to view the data. The API uses Django REST Framework's browsable interface.
+  </div>
+
+  <h2>📋 Forms (Form Definitions)</h2>
+  <p>Form definitions are the templates/structures of your forms (XForm XML).</p>
+  <p><strong>Total Forms: {{ forms_count }}</strong> | <a href="{% url 'form-definition-list' %}"><strong>View All Forms</strong></a></p>
+  
+  {% if forms %}
+    <div class="table-responsive mb-3">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Kobo ID</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for form in forms %}
+            <tr>
+              <td><strong>#{{ form.id }}</strong></td>
+              <td>{{ form.name }}</td>
+              <td><span class="badge badge-secondary">{{ form.version }}</span></td>
+              <td><code>{{ form.kobo_id|truncatechars:20 }}</code></td>
+              <td>{{ form.created_at|date:"M d, Y" }}</td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{% url 'form-definition-detail' pk=form.id %}" class="btn btn-outline-primary" title="View Details">
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                  <a href="{% url 'form-detail' form_id=form.id %}" class="btn btn-outline-info" title="View in Form Interface">
+                    <i class="fas fa-external-link-alt"></i> Interface
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if forms_count > 10 %}
+      <p class="text-muted"><small>Showing latest 10 forms. <a href="{% url 'form-definition-list' %}">View all {{ forms_count }} forms</a></small></p>
+    {% endif %}
+  {% else %}
+    <div class="alert alert-warning">
+      <p>No forms available. <a href="{% url 'admin:api_formdefinition_add' %}">Create a form in Django Admin</a> or POST to <code>/api/forms/</code></p>
+    </div>
+  {% endif %}
+
+  <h2>📝 Submissions (Form Data)</h2>
+  <p>Submissions are the actual data entries submitted by users.</p>
+  <p><strong>Total Submissions: {{ submissions_count }}</strong> | <a href="{% url 'form-submission-list' %}"><strong>View All Submissions</strong></a></p>
+  
+  {% if submissions %}
+    <div class="table-responsive mb-3">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Form</th>
+            <th>Status</th>
+            <th>Submitted At</th>
+            <th>User</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions %}
+            <tr>
+              <td><strong>#{{ submission.id }}</strong></td>
+              <td>{{ submission.form.name|truncatechars:30 }}</td>
+              <td>
+                <span class="badge badge-{% if submission.status == 'approved' %}success{% elif submission.status == 'rejected' %}danger{% elif submission.status == 'submitted' %}primary{% else %}secondary{% endif %}">
+                  {{ submission.status|title }}
+                </span>
+              </td>
+              <td>{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+              <td>{{ submission.user.username|default:"Anonymous" }}</td>
+              <td>
+                <div class="btn-group btn-group-sm" role="group">
+                  <a href="{% url 'form-submission-detail' pk=submission.id %}" class="btn btn-outline-primary" title="View Details">
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if submissions_count > 10 %}
+      <p class="text-muted"><small>Showing latest 10 submissions. <a href="{% url 'form-submission-list' %}">View all {{ submissions_count }} submissions</a></small></p>
+    {% endif %}
+  {% else %}
+    <div class="alert alert-warning">
+      <p>No submissions available. <a href="{% url 'form-list' %}">Fill out a form</a> or POST to <code>/api/submissions/submit/</code></p>
+    </div>
+  {% endif %}
+
+  <h2>📎 Media Files</h2>
+  <p>Media files associated with forms.</p>
+  <ul>
+    <li><a href="{% url 'form-media-list' %}"><strong>View All Media</strong></a> - List all media files</li>
+  </ul>
+
+  <hr>
+  
+  <h3>Quick Access</h3>
+  <div class="btn-group mb-3" role="group">
+    <a href="{% url 'form-list' %}" class="btn btn-primary">
+      <i class="fas fa-clipboard-list"></i> Form Interface
+    </a>
+    <a href="{% url 'form-definition-list' %}" class="btn btn-outline-primary">Forms API</a>
+    <a href="{% url 'form-submission-list' %}" class="btn btn-outline-success">Submissions API</a>
+    <a href="{% url 'form-media-list' %}" class="btn btn-outline-info">Media API</a>
+  </div>
+  
+  <hr>
+  
+  <h3>API Endpoints (JSON)</h3>
+  <p>For programmatic access, use these JSON endpoints:</p>
+  <ul>
+    <li><code>GET /api/forms/</code> - List forms (JSON)</li>
+    <li><code>GET /api/submissions/</code> - List submissions (JSON)</li>
+    <li><code>GET /api/forms/{id}/</code> - Get form details (JSON)</li>
+    <li><code>GET /api/submissions/{id}/</code> - Get submission details (JSON)</li>
+  </ul>
+</div>
+
+<style>
+  .table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+  }
+  .btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+</style>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

@@ -39,7 +39,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'rest_framework',
 ]
+
+# django_kobocollect/django_api_enpoint/django_api_enpoint/settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -49,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'api.middleware.NoCacheAPIMiddleware',  # Prevent API response caching
 ]
 
 ROOT_URLCONF = 'django_api_enpoint.urls'
@@ -80,7 +90,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'kobo_db',
         'HOST': '127.0.0.1',
-        'PORT': 5432,
+        'PORT': 5433,
     }
 }
 
@@ -109,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dili'
 
 USE_I18N = True
 
@@ -136,4 +146,56 @@ MEDIA_URL = "/media/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-ACCESS_TOKEN = 'Token 7e6536da41513caf05449d19127762748b88b748'
+
+# ============================================================================
+# Enketo Express Configuration
+# ============================================================================
+# Enketo Express service URL
+# Set this environment variable to enable Enketo integration
+# Example: export ENKETO_URL=http://localhost:8005
+# For production: export ENKETO_URL=https://enketo.yourdomain.com
+# If not set, Enketo integration will be disabled
+ENKETO_URL = os.getenv('ENKETO_URL', 'http://localhost:8005')
+
+# Enketo Express API token for authentication
+# Optional but recommended for production use
+# Get this from your Enketo Express installation
+# Example: export ENKETO_API_TOKEN=your_api_token_here
+ENKETO_API_TOKEN = os.getenv('ENKETO_API_TOKEN', 'dev_token_12345')
+
+# Request timeout for Enketo API calls (in seconds)
+ENKETO_REQUEST_TIMEOUT = int(os.getenv('ENKETO_REQUEST_TIMEOUT', '30'))
+
+# Site URL for building return URLs (used in form rendering)
+# If not set, will attempt to use request.get_host()
+# Example: export SITE_URL=http://localhost:8000
+SITE_URL = os.getenv('SITE_URL', '')
+
+# ============================================================================
+# Kobo Toolbox Configuration
+# ============================================================================
+# Kobo API base URL
+# Default: https://kf.kobotoolbox.org/api/v2 (Kobo Toolbox)
+# Alternative: https://kobo.humanitarianresponse.info/api/v2 (Kobo Humanitarian Response)
+KOBO_API_BASE_URL = os.getenv('KOBO_API_BASE_URL', 'https://kf.kobotoolbox.org/api/v2')
+
+# Kobo API access token (legacy setting - used by KoboService)
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN', '571af44fa0751fed351e79fdac553f7dd89f2c5c')
+
+# Default Kobo asset ID for data fetching
+KOBO_DEFAULT_ASSET_ID = os.getenv('KOBO_DEFAULT_ASSET_ID', 'awVr5i22y9sWTYd5KguiGr')
+
+# Request timeout for Kobo API calls (in seconds)
+KOBO_REQUEST_TIMEOUT = int(os.getenv('KOBO_REQUEST_TIMEOUT', '30'))
+
+# ============================================================================
+# Configuration Validation
+# ============================================================================
+# Validate Enketo configuration on startup (in development)
+if DEBUG:
+    if not ENKETO_URL:
+        import warnings
+        warnings.warn(
+            'ENKETO_URL is not configured. Enketo integration will not work properly.',
+            UserWarning
+        )

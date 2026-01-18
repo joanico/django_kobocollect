@@ -1,0 +1,56 @@
+{% extends "rest_framework/base.html" %}
+
+{% block title %}API Root - Kobo Django API{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1>API Documentation</h1>
+    <p>Welcome to the API documentation. Use the endpoints below to interact with the API.</p>
+
+  <div class="alert alert-info">
+    <strong>Note:</strong> Click on any link below to view the data. The API uses Django REST Framework's browsable interface.
+  </div>
+
+  <h2>📋 Forms (Form Definitions)</h2>
+  <p>Form definitions are the templates/structures of your forms (XForm XML).</p>
+  <ul>
+    <li><a href="{% url 'form-definition-list' %}"><strong>View All Forms</strong></a> - List all form definitions (currently: 1 form)</li>
+    <li><a href="{% url 'form-definition-detail' pk=1 %}"><strong>View Form #1</strong></a> - View details of form ID 1</li>
+  </ul>
+  <p><small>To add a new form, use Django Admin or POST to <code>/api/forms/</code></small></p>
+
+  <h2>📝 Submissions (Form Data)</h2>
+  <p>Submissions are the actual data entries submitted by users.</p>
+  <ul>
+    <li><a href="{% url 'form-submission-list' %}"><strong>View All Submissions</strong></a> - List all form submissions (currently: 3 submissions)</li>
+    <li><a href="{% url 'form-submission-detail' pk=1 %}"><strong>View Submission #1</strong></a> - View details of submission ID 1</li>
+  </ul>
+  <p><small>To create a new submission, use Django Admin or POST to <code>/api/submissions/submit/</code></small></p>
+
+  <h2>📎 Media Files</h2>
+  <p>Media files associated with forms.</p>
+  <ul>
+    <li><a href="{% url 'form-media-list' %}"><strong>View All Media</strong></a> - List all media files</li>
+  </ul>
+
+  <hr>
+  
+  <h3>Quick Access</h3>
+  <div class="btn-group" role="group">
+    <a href="{% url 'form-definition-list' %}" class="btn btn-primary">Forms</a>
+    <a href="{% url 'form-submission-list' %}" class="btn btn-success">Submissions</a>
+    <a href="{% url 'form-media-list' %}" class="btn btn-info">Media</a>
+  </div>
+  
+  <hr>
+  
+  <h3>API Endpoints (JSON)</h3>
+  <p>For programmatic access, use these JSON endpoints:</p>
+  <ul>
+    <li><code>GET /api/forms/</code> - List forms (JSON)</li>
+    <li><code>GET /api/submissions/</code> - List submissions (JSON)</li>
+    <li><code>GET /api/forms/1/</code> - Get form details (JSON)</li>
+    <li><code>GET /api/submissions/1/</code> - Get submission details (JSON)</li>
+    </ul>
+  </div>
+{% endblock %}

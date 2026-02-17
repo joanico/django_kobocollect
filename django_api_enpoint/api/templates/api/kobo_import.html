@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Import from Kobo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="mb-2"><i class="fas fa-download"></i> Import from Kobo</h1>
+          <p class="lead text-muted mb-0">Import forms and submissions from your Kobo Toolbox account.</p>
+        </div>
+        <div>
+          <a href="{% url 'form-list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Forms
+          </a>
+        </div>
+      </div>
+
+      <!-- Configuration Status -->
+      {% if not kobo_configured %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Kobo Not Configured</h5>
+          <p class="mb-2">Kobo API is not configured. Please set the <code>ACCESS_TOKEN</code> environment variable.</p>
+          <hr>
+          <p class="mb-0">
+            <strong>Quick Setup:</strong>
+            <ol class="mb-0">
+              <li>Get your API token from <a href="https://kf.kobotoolbox.org/#/account-settings/api-tokens" target="_blank">Kobo Account Settings</a></li>
+              <li>Set it in your environment: <code>export ACCESS_TOKEN=your_token_here</code></li>
+              <li>Restart your Django server</li>
+            </ol>
+          </p>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% else %}
+        <div class="alert alert-success">
+          <i class="fas fa-check-circle"></i> <strong>Kobo API Configured</strong> - Connected to {{ kobo_api_url }}
+        </div>
+      {% endif %}
+
+      <!-- Error Display -->
+      {% if kobo_error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <h5 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Error Fetching Forms</h5>
+          <p class="mb-0">{{ kobo_error }}</p>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+      {% endif %}
+
+      <!-- Kobo Forms List -->
+      {% if kobo_configured and kobo_forms %}
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Forms Available in Kobo ({{ kobo_forms|length }})</h5>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Asset ID</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for form in kobo_forms %}
+                    <tr>
+                      <td>
+                        <strong>{{ form.name|default:"Unnamed Form" }}</strong>
+                        {% if form.description %}
+                          <br><small class="text-muted">{{ form.description|truncatewords:20 }}</small>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <code>{{ form.uid|default:form.id }}</code>
+                      </td>
+                      <td>
+                        {% with asset_id=form.uid|default:form.id %}
+                          {% if form.django_form %}
+                            <span class="badge badge-success">Imported</span>
+                          {% else %}
+                            <span class="badge badge-secondary">Not Imported</span>
+                          {% endif %}
+                        {% endwith %}
+                      </td>
+                      <td>
+                        {% with asset_id=form.uid|default:form.id %}
+                          {% if form.django_form %}
+                            <button class="btn btn-sm btn-success import-form-btn" 
+                                    data-asset-id="{{ asset_id }}" 
+                                    data-form-name="{{ form.name|default:'Unnamed Form' }}"
+                                    data-overwrite="true">
+                              <i class="fas fa-sync"></i> Re-import
+                            </button>
+                            <button class="btn btn-sm btn-info import-submissions-btn ml-1" 
+                                    data-asset-id="{{ asset_id }}"
+                                    data-form-id="{{ form.django_form.id }}"
+                                    data-form-name="{{ form.name|default:'Unnamed Form' }}">
+                              <i class="fas fa-download"></i> Import Submissions
+                            </button>
+                          {% else %}
+                            <button class="btn btn-sm btn-primary import-form-btn" 
+                                    data-asset-id="{{ asset_id }}" 
+                                    data-form-name="{{ form.name|default:'Unnamed Form' }}"
+                                    data-overwrite="false">
+                              <i class="fas fa-download"></i> Import Form
+                            </button>
+                          {% endif %}
+                        {% endwith %}
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% elif kobo_configured and not kobo_error %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i> No forms found in your Kobo account, or you don't have access to any forms.
+        </div>
+      {% endif %}
+
+      <!-- Imported Forms in Django -->
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0"><i class="fas fa-database"></i> Forms in Django ({{ django_forms|length }})</h5>
+        </div>
+        <div class="card-body">
+          {% if django_forms %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Kobo ID</th>
+                    <th>Version</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for form in django_forms %}
+                    <tr>
+                      <td><a href="{% url 'form-detail' form_id=form.id %}">{{ form.name }}</a></td>
+                      <td><code>{{ form.kobo_id }}</code></td>
+                      <td>{{ form.version }}</td>
+                      <td>{{ form.created_at|date:"M d, Y" }}</td>
+                      <td>
+                        <a href="{% url 'form-detail' form_id=form.id %}" class="btn btn-sm btn-outline-info">
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="text-muted">No forms imported yet. Import forms from Kobo using the table above.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-3 mb-0" id="loadingMessage">Importing...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success/Error Toast -->
+<div class="toast" id="importToast" style="position: fixed; top: 20px; right: 20px; z-index: 9999;" role="alert" aria-live="assertive" aria-atomic="true">
+  <div class="toast-header">
+    <strong class="mr-auto" id="toastTitle">Import</strong>
+    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="toast-body" id="toastMessage">
+    <!-- Message will be inserted here -->
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+  const toast = document.getElementById('importToast');
+  
+  // Import Form Handler
+  document.querySelectorAll('.import-form-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const assetId = this.dataset.assetId;
+      const formName = this.dataset.formName;
+      const overwrite = this.dataset.overwrite === 'true';
+      
+      document.getElementById('loadingMessage').textContent = `Importing form: ${formName}...`;
+      loadingModal.show();
+      
+      fetch('{% url "kobo-import-form" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          asset_id: assetId,
+          overwrite: overwrite
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+          showToast('success', 'Form Imported', 
+            `Form "${formName}" has been ${data.action} successfully!`);
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          showToast('danger', 'Import Failed', data.error || 'Unknown error occurred');
+        }
+      })
+      .catch(error => {
+        loadingModal.hide();
+        showToast('danger', 'Import Failed', error.message || 'Network error occurred');
+      });
+    });
+  });
+  
+  // Import Submissions Handler
+  document.querySelectorAll('.import-submissions-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const assetId = this.dataset.assetId;
+      const formId = this.dataset.formId;
+      const formName = this.dataset.formName;
+      
+      document.getElementById('loadingMessage').textContent = `Importing submissions for: ${formName}...`;
+      loadingModal.show();
+      
+      fetch('{% url "kobo-import-submissions" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          asset_id: assetId,
+          form_id: parseInt(formId)
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        loadingModal.hide();
+        if (data.success) {
+          showToast('success', 'Submissions Imported', 
+            `Imported ${data.imported_count} submission(s) for "${formName}". ${data.skipped_count} already existed.`);
+        } else {
+          showToast('danger', 'Import Failed', data.error || 'Unknown error occurred');
+        }
+      })
+      .catch(error => {
+        loadingModal.hide();
+        showToast('danger', 'Import Failed', error.message || 'Network error occurred');
+      });
+    });
+  });
+  
+  function showToast(type, title, message) {
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMessage').textContent = message;
+    toast.className = `toast toast-${type}`;
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+  }
+});
+</script>
+{% endblock %}
+
